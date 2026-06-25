@@ -10,6 +10,9 @@ public class Contato : EntidadeBase<Contato>
     public string Cargo { get; set; }
     public string Empresa { get; set; }
 
+    public Contato()
+    {
+    }
     public Contato(
         string nome,
         string email,
