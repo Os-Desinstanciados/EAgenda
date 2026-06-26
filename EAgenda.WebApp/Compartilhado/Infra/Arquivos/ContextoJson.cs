@@ -2,6 +2,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
 using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
+using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 
 
 namespace EAgenda.WebApp.Compartilhado.Infra.Arquivos;
@@ -12,6 +14,8 @@ public sealed class ContextoJson
 
     public List<Contato> Contatos { get; set; } = new List<Contato>();
     public List<Compromisso> Compromissos { get; set; } = new List<Compromisso>();
+    public List<Categoria> Categorias { get; set; } = new List<Categoria>();
+    public List<Despesa> Despesas { get; set; } = new List<Despesa>();
 
     public ContextoJson()
     {
@@ -58,5 +62,7 @@ public sealed class ContextoJson
 
         Contatos = contextoSalvo.Contatos ?? new List<Contato>();
         Compromissos = contextoSalvo.Compromissos ?? new List<Compromisso>();
+        Categorias = contextoSalvo.Categorias ?? new List<Categoria>();
+        Despesas = contextoSalvo.Despesas ?? new List<Despesa>();
     }
 }
