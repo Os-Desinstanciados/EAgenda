@@ -19,15 +19,13 @@ public class Despesa : EntidadeBase<Despesa>
         string descricao,
         DateTime dataOcorrencia,
         decimal valor,
-        string formaPagamento,
-        Categoria categoria
+        string formaPagamento        
     ) : this()
     {
         Descricao = descricao;
         DataOcorrencia = dataOcorrencia;
         Valor = valor;
-        FormaPagamento = formaPagamento;
-        Categoria = categoria;
+        FormaPagamento = formaPagamento;        
     }    
 
     public override List<string> Validar()
@@ -43,8 +41,8 @@ public class Despesa : EntidadeBase<Despesa>
         if (string.IsNullOrWhiteSpace(FormaPagamento))
             erros.Add("O campo \"Forma de Pagamento\" deve ser preenchido.");
 
-        if (Categoria == null)
-            erros.Add("O campo \"Categoria\" deve ser preenchido.");
+        // if (Categoria == null)
+        //     erros.Add("O campo \"Categoria\" deve ser preenchido.");
 
         return erros;
     }

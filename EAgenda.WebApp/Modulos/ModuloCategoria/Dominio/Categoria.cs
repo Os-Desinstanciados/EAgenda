@@ -16,8 +16,7 @@ public class Categoria : EntidadeBase<Categoria>
 
     public Categoria(string titulo) : this()
     {
-        Titulo = titulo;  
-       
+        Titulo = titulo;       
     }
     
 
