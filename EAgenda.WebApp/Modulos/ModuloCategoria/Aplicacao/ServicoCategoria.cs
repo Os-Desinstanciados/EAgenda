@@ -39,21 +39,21 @@ public class ServicoCategoria
 
     public Result Editar(EditarCategoriaDto dto)
     {        
-        if (ExisteCategoriaComTitulo(dto.Titulo))
-            return Falha(nameof(dto.Titulo), "Já existe uma categoria com este título.");
+        if (ExisteCategoriaComTitulo(dto.Titulo, dto.Id))
+        return Falha(nameof(dto.Titulo), "Já existe uma categoria com este título.");
 
-        Categoria categoriaAtualizada = new Categoria(
-            dto.Titulo                     
-        );
+    Categoria categoriaAtualizada = new Categoria(
+        dto.Titulo                     
+    );
 
-        Result resultadoValidacao = ValidarEntidade(categoriaAtualizada);
+    Result resultadoValidacao = ValidarEntidade(categoriaAtualizada);
 
-        if (resultadoValidacao.IsFailed)
-            return resultadoValidacao;
+    if (resultadoValidacao.IsFailed)
+        return resultadoValidacao;
 
-        repositorioCategoria.Editar(dto.Id, categoriaAtualizada);
+    repositorioCategoria.Editar(dto.Id, categoriaAtualizada);
 
-        return Result.Ok();
+    return Result.Ok();
     }
 
     public Result Excluir(Guid id)

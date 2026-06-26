@@ -28,8 +28,8 @@ public class Categoria : EntidadeBase<Categoria>
         if (string.IsNullOrWhiteSpace(Titulo) || Titulo.Length < 2 || Titulo.Length > 100)
             erros.Add("O campo \"Titulo\" deve conter entre 2 e 100 caracteres.");
         
-        if (Despesa == null)
-            erros.Add("O campo \"Despesa\" deve ser preenchido.");
+        // if (Despesa == null)
+        //     erros.Add("O campo \"Despesa\" deve ser preenchido.");
 
         return erros;
     }
