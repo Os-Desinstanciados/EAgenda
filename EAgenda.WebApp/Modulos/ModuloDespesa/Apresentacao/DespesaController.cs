@@ -21,6 +21,9 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
     public ActionResult Cadastrar()
     {
         CadastrarDespesaViewModel cadastrarVm = new CadastrarDespesaViewModel(
+            string.Empty,
+            DateTime.Now,
+            0,
             string.Empty            
         );
 

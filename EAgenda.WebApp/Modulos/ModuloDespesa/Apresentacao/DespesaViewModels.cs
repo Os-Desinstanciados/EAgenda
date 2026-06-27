@@ -13,7 +13,16 @@ public record ListarDespesasViewModel(
 public record CadastrarDespesaViewModel(
     [Required(ErrorMessage = "O campo \"Descrição\" deve ser preenchido.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Descrição\" deve conter entre 2 e 100 caracteres.")]
-    string Descricao
+    string Descricao,
+
+    DateTime? DataOcorrencia,
+
+    [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
+    decimal Valor,
+
+    [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
+    string FormaPagamento
 );
 
 public record EditarDespesaViewModel(
@@ -21,7 +30,16 @@ public record EditarDespesaViewModel(
 
     [Required(ErrorMessage = "O campo \"Descrição\" deve ser preenchido.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Descrição\" deve conter entre 2 e 100 caracteres.")]
-    string Descricao    
+    string Descricao,
+
+    DateTime? DataOcorrencia,
+
+    [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
+    decimal Valor,
+
+    [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
+    string FormaPagamento
 );
 
 public record ExcluirDespesaViewModel(
