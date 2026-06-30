@@ -8,10 +8,10 @@ namespace EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
 public class Categoria : EntidadeBase<Categoria>
 {
     public string Titulo { get; set; } = string.Empty;    
-    public Despesa Despesa { get; set; } = null!;    
+    public List<Despesa> Despesas { get; set; } = [];  
 
     public Categoria()
-    {
+    {        
     }
 
     public Categoria(string titulo) : this()
@@ -33,6 +33,6 @@ public class Categoria : EntidadeBase<Categoria>
     public override void Atualizar(Categoria entidadeAtualizada)
     {
         Titulo = entidadeAtualizada.Titulo;       
-        Despesa = entidadeAtualizada.Despesa;
+        Despesas = entidadeAtualizada.Despesas;
     }
 }
