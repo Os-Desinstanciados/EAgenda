@@ -4,6 +4,8 @@ using EAgenda.WebApp.Compartilhado.Apresentacao.Extensions;
 using EAgenda.WebApp.Modulos.ModuloDespesa.Aplicacao;
 using Microsoft.AspNetCore.Mvc;
 
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
+
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Apresentacao;
 
 public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) : Controller
@@ -24,7 +26,9 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
             string.Empty,
             DateTime.Now,
             0,
-            string.Empty            
+            FormaPagamentoEnum.Pix,
+            Guid.Empty,
+            SelecionarCategorias()            
         );
 
         return View(cadastrarVm);
@@ -34,7 +38,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
     public ActionResult Cadastrar(CadastrarDespesaViewModel cadastrarVm)
     {
         if (!ModelState.IsValid)
-            return View(cadastrarVm);
+            return View(cadastrarVm with { Categorias = SelecionarCategorias() });
 
         CadastrarDespesaDto dto = mapeador.Map<CadastrarDespesaDto>(cadastrarVm);
         Result resultado = servicoDespesa.Cadastrar(dto);
@@ -43,7 +47,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
         {
             ModelState.AddModelError(resultado);
 
-            return View(cadastrarVm);
+            return View(cadastrarVm with { Categorias = SelecionarCategorias() });
         }
 
         return RedirectToAction(nameof(Listar));
@@ -62,7 +66,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
         }
 
         EditarDespesaViewModel editarVm =
-            mapeador.Map<EditarDespesaViewModel>(resultado.Value);
+            mapeador.Map<EditarDespesaViewModel>(resultado.Value) with { Categorias = SelecionarCategorias() };
 
         return View(editarVm);
     }
@@ -71,7 +75,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
     public ActionResult Editar(EditarDespesaViewModel editarVm)
     {
         if (!ModelState.IsValid)
-            return View(editarVm);
+            return View(editarVm with { Categorias = SelecionarCategorias() });
 
         EditarDespesaDto dto = mapeador.Map<EditarDespesaDto>(editarVm);
         Result resultado = servicoDespesa.Editar(dto);
@@ -80,7 +84,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
         {
             ModelState.AddModelError(resultado);
 
-            return View(editarVm);
+            return View(editarVm with { Categorias = SelecionarCategorias() });
         }
 
         return RedirectToAction(nameof(Listar));
@@ -112,5 +116,12 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
             TempData.AddErrorMessage(resultado);
 
         return RedirectToAction(nameof(Listar));
-    }    
+    } 
+
+    private List<OpcaoCategoriaViewModel> SelecionarCategorias()
+    {
+        List<OpcaoCategoriaDto> dtos = servicoDespesa.SelecionarCategorias();
+
+        return mapeador.Map<List<OpcaoCategoriaViewModel>>(dtos);
+    }   
 }

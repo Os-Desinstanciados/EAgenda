@@ -1,13 +1,22 @@
 using System.ComponentModel.DataAnnotations;
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Apresentacao;
+
+public record OpcaoCategoriaViewModel(
+    Guid Id,
+    string Titulo
+);
 
 public record ListarDespesasViewModel(
     Guid Id,
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    string FormaPagamento    
+    FormaPagamentoEnum FormaPagamento,
+    Guid CategoriaId,
+    string CategoriaTitulo    
 );
 
 public record CadastrarDespesaViewModel(
@@ -19,10 +28,17 @@ public record CadastrarDespesaViewModel(
 
     [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
+    [DataType(DataType.Currency)]
     decimal Valor,
 
     [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
-    string FormaPagamento
+    FormaPagamentoEnum FormaPagamento,
+
+    [Required(ErrorMessage = "O campo \"Categoria\" deve ser preenchido.")]
+    Guid CategoriaId,
+
+    [ValidateNever]
+    List<OpcaoCategoriaViewModel> Categorias
 );
 
 public record EditarDespesaViewModel(
@@ -36,10 +52,17 @@ public record EditarDespesaViewModel(
 
     [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
+    [DataType(DataType.Currency)]
     decimal Valor,
 
     [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
-    string FormaPagamento
+    FormaPagamentoEnum FormaPagamento,
+
+    [Required(ErrorMessage = "O campo \"Categoria\" deve ser preenchido.")]
+    Guid CategoriaId,
+
+    [ValidateNever]
+    List<OpcaoCategoriaViewModel> Categorias
 );
 
 public record ExcluirDespesaViewModel(
@@ -47,5 +70,7 @@ public record ExcluirDespesaViewModel(
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    string FormaPagamento    
+    FormaPagamentoEnum FormaPagamento,
+    Guid CategoriaId,
+    string CategoriaTitulo    
 );

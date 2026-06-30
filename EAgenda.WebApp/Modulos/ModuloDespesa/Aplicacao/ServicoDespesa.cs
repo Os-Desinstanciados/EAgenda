@@ -19,12 +19,18 @@ public class ServicoDespesa
     }
 
     public Result Cadastrar(CadastrarDespesaDto dto)
-    {             
+    {
+        Categoria? categoriaSelecionada = repositorioCategoria.SelecionarPorId(dto.CategoriaId);
+
+        if (categoriaSelecionada == null)
+            return Falha(nameof(dto.CategoriaId), "Selecione uma categoria válida");
+
         Despesa novaDespesa = new Despesa(
             dto.Descricao,
             dto.DataOcorrencia,
             dto.Valor,
-            dto.FormaPagamento
+            dto.FormaPagamento,
+            categoriaSelecionada
         );
 
         Result resultadoValidacao = ValidarEntidade(novaDespesa);
@@ -38,23 +44,33 @@ public class ServicoDespesa
     }
 
     public Result Editar(EditarDespesaDto dto)
-    {             
+    {
+        Despesa? despesa = repositorioDespesa.SelecionarPorId(dto.Id);
 
-    Despesa despesaAtualizada = new Despesa(
-        dto.Descricao,
-        dto.DataOcorrencia,
-        dto.Valor,
-        dto.FormaPagamento                     
-    );
+        if (despesa == null)
+            return Result.Fail("Despesa não encontrada.");
 
-    Result resultadoValidacao = ValidarEntidade(despesaAtualizada);
+        Categoria? categoriaSelecionada = repositorioCategoria.SelecionarPorId(dto.CategoriaId);
 
-    if (resultadoValidacao.IsFailed)
-        return resultadoValidacao;
+        if (categoriaSelecionada == null)
+            return Falha(nameof(dto.CategoriaId), "Selecione uma categoria válida");            
 
-    repositorioDespesa.Editar(dto.Id, despesaAtualizada);
+        Despesa despesaAtualizada = new Despesa(
+            dto.Descricao,
+            dto.DataOcorrencia,
+            dto.Valor,
+            dto.FormaPagamento,
+            categoriaSelecionada                    
+        );
 
-    return Result.Ok();
+        Result resultadoValidacao = ValidarEntidade(despesaAtualizada);
+
+        if (resultadoValidacao.IsFailed)
+            return resultadoValidacao;
+
+        repositorioDespesa.Editar(dto.Id, despesaAtualizada);
+
+        return Result.Ok();
     }
 
     public Result Excluir(Guid id)
@@ -78,7 +94,9 @@ public class ServicoDespesa
                 d.Descricao,
                 d.DataOcorrencia,
                 d.Valor,
-                d.FormaPagamento                                                     
+                d.FormaPagamento,
+                d.Categoria.Id,
+                d.Categoria.Titulo                                                     
             ))
             .ToList();
     }
@@ -95,9 +113,20 @@ public class ServicoDespesa
             despesa.Descricao,
             despesa.DataOcorrencia,                       
             despesa.Valor,                       
-            despesa.FormaPagamento                       
-        ));    }
+            despesa.FormaPagamento,
+            despesa.Categoria.Id,
+            despesa.Categoria.Titulo                       
+            )
+        );
+    }
     
+    public List<OpcaoCategoriaDto> SelecionarCategorias()
+    {
+        return repositorioCategoria
+            .SelecionarTodos()
+            .Select(c => new OpcaoCategoriaDto(c.Id, c.Titulo))
+            .ToList();
+    }
 
     private static Result ValidarEntidade(Despesa despesa)
     {
