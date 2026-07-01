@@ -1,0 +1,21 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "sqlproj: Build EAgenda.Web.Database",
+			"type": "process",
+			"command": "dotnet",
+			"args": [
+				"build",
+				"c:/Users/juny1/Desktop/Academia Programador/eAgenda/EAgenda.Web.Database/EAgenda.Web.Database.sqlproj"
+			],
+			"problemMatcher": "$sqlproj-problem-matcher",
+			"isBackground": true,
+			"group": {
+				"kind": "build",
+				"isDefault": true
+			},
+			"detail": "Builds the EAgenda.Web.Database SQL project"
+		}
+	]
+}
