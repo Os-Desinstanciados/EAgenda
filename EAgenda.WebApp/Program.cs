@@ -4,18 +4,16 @@ using EAgenda.WebApp.Compartilhado.Infra;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Configuração de Dependências (Dependency Injection)
+// Configuração do container de injeção de dependência
 builder.Services.AddInfraRepositories();
 
-builder.Services.AddApplicationServices();
+builder.Services.AddApplicationServices(builder.Configuration, builder.Logging);
 
-builder.Services.AddPresentationConfig();
+builder.Services.AddPresentationConfig(builder.Configuration);
 
 var app = builder.Build();
 
-// Configuração de Middlewares
-app.UseStaticFiles();
-
+// Middlewares de roteamento
 app.UseRouting();
 app.MapDefaultControllerRoute();
 

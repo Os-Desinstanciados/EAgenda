@@ -12,6 +12,7 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
     public ActionResult Listar()
     {
         List<ListarCategoriasDto> dtos = servicoCategoria.SelecionarTodos();
+
         List<ListarCategoriasViewModel> listarVms = mapeador.Map<List<ListarCategoriasViewModel>>(dtos);
 
         return View(listarVms);
@@ -20,9 +21,7 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
     [HttpGet]
     public ActionResult Cadastrar()
     {
-        CadastrarCategoriaViewModel cadastrarVm = new CadastrarCategoriaViewModel(
-            string.Empty            
-        );
+        CadastrarCategoriaViewModel cadastrarVm = new CadastrarCategoriaViewModel(string.Empty);
 
         return View(cadastrarVm);
     }
@@ -34,6 +33,7 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
             return View(cadastrarVm);
 
         CadastrarCategoriaDto dto = mapeador.Map<CadastrarCategoriaDto>(cadastrarVm);
+
         Result resultado = servicoCategoria.Cadastrar(dto);
 
         if (resultado.IsFailed)
@@ -58,8 +58,7 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
             return RedirectToAction(nameof(Listar));
         }
 
-        EditarCategoriaViewModel editarVm =
-            mapeador.Map<EditarCategoriaViewModel>(resultado.Value);
+        EditarCategoriaViewModel editarVm = mapeador.Map<EditarCategoriaViewModel>(resultado.Value);
 
         return View(editarVm);
     }
@@ -71,6 +70,7 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
             return View(editarVm);
 
         EditarCategoriaDto dto = mapeador.Map<EditarCategoriaDto>(editarVm);
+
         Result resultado = servicoCategoria.Editar(dto);
 
         if (resultado.IsFailed)
@@ -109,5 +109,5 @@ public class CategoriaController(ServicoCategoria servicoCategoria, IMapper mape
             TempData.AddErrorMessage(resultado);
 
         return RedirectToAction(nameof(Listar));
-    }    
+    }
 }

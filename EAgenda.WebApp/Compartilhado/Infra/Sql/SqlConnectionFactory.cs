@@ -9,7 +9,7 @@ public interface ISqlConnectionFactory
 
 public sealed class SqlConnectionFactory(IConfiguration configuration) : ISqlConnectionFactory
 {
-    private const string NomeConnectionString = "EAgenda";
+    private const string NomeConnectionString = "SqlServer";
 
     // ConnectionString = Endereço do banco de dados local/remoto que vamos usar
     public SqlConnection CreateConnection()

@@ -1,31 +1,26 @@
 using FluentResults;
-using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
+using EAgenda.WebApp.Compartilhado.Aplicacao;
 
 namespace EAgenda.WebApp.Modulos.ModuloCategoria.Aplicacao;
 
-public class ServicoCategoria
+public class ServicoCategoria : ServicoBase<Categoria>
 {
     private readonly IRepositorioCategoria repositorioCategoria;
-    private readonly IRepositorioDespesa repositorioDespesa;
 
     public ServicoCategoria(
-        IRepositorioCategoria repositorioCategoria,
-        IRepositorioDespesa repositorioDespesa
+        IRepositorioCategoria repositorioCategoria
     )
     {
         this.repositorioCategoria = repositorioCategoria;
-        this.repositorioDespesa = repositorioDespesa;
     }
 
     public Result Cadastrar(CadastrarCategoriaDto dto)
-    {      
-        if (ExisteCategoriaComTitulo(dto.Titulo))
+    {
+        if (ExisteCategoriaComMesmoTitulo(dto.Titulo))
             return Falha(nameof(dto.Titulo), "Já existe uma categoria com este título.");
 
-        Categoria novaCategoria = new Categoria(
-            dto.Titulo
-        );
+        Categoria novaCategoria = new Categoria(dto.Titulo);
 
         Result resultadoValidacao = ValidarEntidade(novaCategoria);
 
@@ -38,22 +33,23 @@ public class ServicoCategoria
     }
 
     public Result Editar(EditarCategoriaDto dto)
-    {        
-        if (ExisteCategoriaComTitulo(dto.Titulo, dto.Id))
-        return Falha(nameof(dto.Titulo), "Já existe uma categoria com este título.");
+    {
+        if (ExisteCategoriaComMesmoTitulo(dto.Titulo, dto.Id))
+            return Falha(nameof(dto.Titulo), "Já existe uma categoria com este título.");
 
-    Categoria categoriaAtualizada = new Categoria(
-        dto.Titulo                     
-    );
+        Categoria categoriaAtualizada = new Categoria(dto.Titulo);
 
-    Result resultadoValidacao = ValidarEntidade(categoriaAtualizada);
+        Result resultadoValidacao = ValidarEntidade(categoriaAtualizada);
 
-    if (resultadoValidacao.IsFailed)
-        return resultadoValidacao;
+        if (resultadoValidacao.IsFailed)
+            return resultadoValidacao;
 
-    repositorioCategoria.Editar(dto.Id, categoriaAtualizada);
+        bool conseguiuEditar = repositorioCategoria.Editar(dto.Id, categoriaAtualizada);
 
-    return Result.Ok();
+        if (!conseguiuEditar)
+            return Falha(string.Empty, "Categoria não encontrada.");
+
+        return Result.Ok();
     }
 
     public Result Excluir(Guid id)
@@ -61,7 +57,7 @@ public class ServicoCategoria
         Categoria? categoria = repositorioCategoria.SelecionarPorId(id);
 
         if (categoria == null)
-            return Result.Fail("Categoria não encontrada.");
+            return Falha(string.Empty, "Categoria não encontrada.");
 
         repositorioCategoria.Excluir(id);
 
@@ -72,10 +68,7 @@ public class ServicoCategoria
     {
         return repositorioCategoria
             .SelecionarTodos()
-            .Select(c => new ListarCategoriasDto(
-                c.Id,
-                c.Titulo                                                     
-            ))
+            .Select(c => new ListarCategoriasDto(c.Id, c.Titulo))
             .ToList();
     }
 
@@ -86,35 +79,23 @@ public class ServicoCategoria
         if (categoria == null)
             return Result.Fail("Categoria não encontrada.");
 
-        return Result.Ok(new DetalhesCategoriaDto(
-            categoria.Id,
-            categoria.Titulo                       
-        ));    }
+        return Result.Ok(new DetalhesCategoriaDto(categoria.Id, categoria.Titulo));
+    }
 
-    
-
-    private bool ExisteCategoriaComTitulo(string titulo, Guid? idIgnorado = null)
+    private bool ExisteCategoriaComMesmoTitulo(string titulo, Guid? idIgnorado = null)
     {
+        string tituloNormalizado = NormalizarTitulo(titulo);
+
         return repositorioCategoria
             .SelecionarTodos()
             .Any(c =>
                 c.Id != idIgnorado &&
-                string.Equals(c.Titulo, titulo, StringComparison.OrdinalIgnoreCase)
+                NormalizarTitulo(c.Titulo) == tituloNormalizado
             );
     }
 
-    private static Result ValidarEntidade(Categoria categoria)
+    private static string NormalizarTitulo(string titulo)
     {
-        List<string> erros = categoria.Validar();
-
-        if (erros.Count == 0)
-            return Result.Ok();
-
-        return Result.Fail(new Error(erros.First()).WithMetadata("Campo", string.Empty));
-    }
-
-    private static Result Falha(string campo, string mensagem)
-    {
-        return Result.Fail(new Error(mensagem).WithMetadata("Campo", campo));
+        return titulo.Trim().ToLowerInvariant();
     }
 }
