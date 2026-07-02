@@ -6,10 +6,10 @@ namespace EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 public class Despesa : EntidadeBase<Despesa>
 {
     public string Descricao { get; set; } = string.Empty;
-    public DateTime DataOcorrencia { get; set; } = DateTime.Now;
-    public decimal Valor { get; set; } = 0;
-    public FormaPagamentoEnum FormaPagamento { get; set; }
-    public Categoria Categoria { get; set; } = null!;
+    public DateTime DataOcorrencia { get; set; } = DateTime.Today;
+    public decimal Valor { get; set; }
+    public FormaPagamento FormaPagamento { get; set; }
+    public List<Categoria> Categorias { get; set; } = [];
 
     public Despesa()
     {
@@ -19,16 +19,16 @@ public class Despesa : EntidadeBase<Despesa>
         string descricao,
         DateTime dataOcorrencia,
         decimal valor,
-        FormaPagamentoEnum formaPagamento,
-        Categoria categoria        
+        FormaPagamento formaPagamento,
+        List<Categoria> categorias
     ) : this()
     {
         Descricao = descricao;
-        DataOcorrencia = dataOcorrencia;
+        DataOcorrencia = dataOcorrencia.Date;
         Valor = valor;
         FormaPagamento = formaPagamento;
-        Categoria = categoria;        
-    }    
+        Categorias = categorias;
+    }
 
     public override List<string> Validar()
     {
@@ -37,14 +37,17 @@ public class Despesa : EntidadeBase<Despesa>
         if (string.IsNullOrWhiteSpace(Descricao) || Descricao.Length < 2 || Descricao.Length > 100)
             erros.Add("O campo \"Descrição\" deve conter entre 2 e 100 caracteres.");
 
+        if (DataOcorrencia == default)
+            erros.Add("O campo \"Data de Ocorrência\" deve ser preenchido.");
+
         if (Valor <= 0)
-            erros.Add("O campo \"Valor\" deve conter um valor maior que 0.");
+            erros.Add("O campo \"Valor\" deve ser maior que zero.");
 
-        if (!Enum.IsDefined(typeof(FormaPagamentoEnum), FormaPagamento))
-        erros.Add("Selecione uma \"Forma de Pagamento\" válida.");
+        if (!Enum.IsDefined(FormaPagamento))
+            erros.Add("O campo \"Forma de Pagamento\" deve ser preenchido.");
 
-        if (Categoria == null)
-            erros.Add("O campo \"Categoria\" deve ser preenchido.");
+        if (Categorias.Count == 0)
+            erros.Add("Selecione ao menos uma categoria.");
 
         return erros;
     }
@@ -55,6 +58,6 @@ public class Despesa : EntidadeBase<Despesa>
         DataOcorrencia = entidadeAtualizada.DataOcorrencia;
         Valor = entidadeAtualizada.Valor;
         FormaPagamento = entidadeAtualizada.FormaPagamento;
-        Categoria = entidadeAtualizada.Categoria;
+        Categorias = entidadeAtualizada.Categorias;
     }
 }

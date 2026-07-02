@@ -1,10 +1,11 @@
 using FluentResults;
-using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
+using EAgenda.WebApp.Compartilhado.Aplicacao;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Aplicacao;
 
-public class ServicoDespesa
+public class ServicoDespesa : ServicoBase<Despesa>
 {
     private readonly IRepositorioDespesa repositorioDespesa;
     private readonly IRepositorioCategoria repositorioCategoria;
@@ -20,17 +21,17 @@ public class ServicoDespesa
 
     public Result Cadastrar(CadastrarDespesaDto dto)
     {
-        Categoria? categoriaSelecionada = repositorioCategoria.SelecionarPorId(dto.CategoriaId);
+        Result<List<Categoria>> resultadoCategorias = SelecionarCategorias(dto.CategoriaIds);
 
-        if (categoriaSelecionada == null)
-            return Falha(nameof(dto.CategoriaId), "Selecione uma categoria válida");
+        if (resultadoCategorias.IsFailed)
+            return resultadoCategorias.ToResult();
 
         Despesa novaDespesa = new Despesa(
             dto.Descricao,
-            dto.DataOcorrencia,
+            dto.DataOcorrencia?.Date ?? DateTime.Today,
             dto.Valor,
             dto.FormaPagamento,
-            categoriaSelecionada
+            resultadoCategorias.Value
         );
 
         Result resultadoValidacao = ValidarEntidade(novaDespesa);
@@ -45,22 +46,17 @@ public class ServicoDespesa
 
     public Result Editar(EditarDespesaDto dto)
     {
-        Despesa? despesa = repositorioDespesa.SelecionarPorId(dto.Id);
+        Result<List<Categoria>> resultadoCategorias = SelecionarCategorias(dto.CategoriaIds);
 
-        if (despesa == null)
-            return Result.Fail("Despesa não encontrada.");
-
-        Categoria? categoriaSelecionada = repositorioCategoria.SelecionarPorId(dto.CategoriaId);
-
-        if (categoriaSelecionada == null)
-            return Falha(nameof(dto.CategoriaId), "Selecione uma categoria válida");            
+        if (resultadoCategorias.IsFailed)
+            return resultadoCategorias.ToResult();
 
         Despesa despesaAtualizada = new Despesa(
             dto.Descricao,
-            dto.DataOcorrencia,
+            dto.DataOcorrencia?.Date ?? DateTime.Today,
             dto.Valor,
             dto.FormaPagamento,
-            categoriaSelecionada                    
+            resultadoCategorias.Value
         );
 
         Result resultadoValidacao = ValidarEntidade(despesaAtualizada);
@@ -68,7 +64,10 @@ public class ServicoDespesa
         if (resultadoValidacao.IsFailed)
             return resultadoValidacao;
 
-        repositorioDespesa.Editar(dto.Id, despesaAtualizada);
+        bool conseguiuEditar = repositorioDespesa.Editar(dto.Id, despesaAtualizada);
+
+        if (!conseguiuEditar)
+            return Falha(string.Empty, "Despesa não encontrada.");
 
         return Result.Ok();
     }
@@ -78,7 +77,7 @@ public class ServicoDespesa
         Despesa? despesa = repositorioDespesa.SelecionarPorId(id);
 
         if (despesa == null)
-            return Result.Fail("Despesa não encontrada.");
+            return Falha(string.Empty, "Despesa não encontrada.");
 
         repositorioDespesa.Excluir(id);
 
@@ -95,8 +94,7 @@ public class ServicoDespesa
                 d.DataOcorrencia,
                 d.Valor,
                 d.FormaPagamento,
-                d.Categoria.Id,
-                d.Categoria.Titulo                                                     
+                d.Categorias.Select(c => new CategoriaDespesaDto(c.Id, c.Titulo)).ToList()
             ))
             .ToList();
     }
@@ -111,35 +109,39 @@ public class ServicoDespesa
         return Result.Ok(new DetalhesDespesaDto(
             despesa.Id,
             despesa.Descricao,
-            despesa.DataOcorrencia,                       
-            despesa.Valor,                       
+            despesa.DataOcorrencia,
+            despesa.Valor,
             despesa.FormaPagamento,
-            despesa.Categoria.Id,
-            despesa.Categoria.Titulo                       
-            )
-        );
+            despesa.Categorias.Select(c => new CategoriaDespesaDto(c.Id, c.Titulo)).ToList()
+        ));
     }
-    
-    public List<OpcaoCategoriaDto> SelecionarCategorias()
+
+    public List<CategoriaDespesaDto> SelecionarCategorias()
     {
         return repositorioCategoria
             .SelecionarTodos()
-            .Select(c => new OpcaoCategoriaDto(c.Id, c.Titulo))
+            .Select(c => new CategoriaDespesaDto(c.Id, c.Titulo))
             .ToList();
     }
 
-    private static Result ValidarEntidade(Despesa despesa)
+    private Result<List<Categoria>> SelecionarCategorias(List<Guid>? categoriaIds)
     {
-        List<string> erros = despesa.Validar();
+        List<Guid> idsDistintos = (categoriaIds ?? [])
+            .Where(id => id != Guid.Empty)
+            .Distinct()
+            .ToList();
 
-        if (erros.Count == 0)
-            return Result.Ok();
+        if (idsDistintos.Count == 0)
+            return Result.Fail<List<Categoria>>(new Error("Selecione ao menos uma categoria.").WithMetadata("Campo", nameof(CadastrarDespesaDto.CategoriaIds)));
 
-        return Result.Fail(new Error(erros.First()).WithMetadata("Campo", string.Empty));
-    }
+        List<Categoria> categoriasSelecionadas = repositorioCategoria
+            .SelecionarTodos()
+            .Where(c => idsDistintos.Contains(c.Id))
+            .ToList();
 
-    private static Result Falha(string campo, string mensagem)
-    {
-        return Result.Fail(new Error(mensagem).WithMetadata("Campo", campo));
+        if (categoriasSelecionadas.Count != idsDistintos.Count)
+            return Result.Fail<List<Categoria>>(new Error("Selecione apenas categorias válidas.").WithMetadata("Campo", nameof(CadastrarDespesaDto.CategoriaIds)));
+
+        return Result.Ok(categoriasSelecionadas);
     }
 }

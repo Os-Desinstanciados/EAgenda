@@ -4,19 +4,13 @@ using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Apresentacao;
 
-public record OpcaoCategoriaViewModel(
-    Guid Id,
-    string Titulo
-);
-
 public record ListarDespesasViewModel(
     Guid Id,
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId,
-    string CategoriaTitulo    
+    FormaPagamento FormaPagamento,
+    List<CategoriaDespesaViewModel> Categorias
 );
 
 public record CadastrarDespesaViewModel(
@@ -24,21 +18,19 @@ public record CadastrarDespesaViewModel(
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Descrição\" deve conter entre 2 e 100 caracteres.")]
     string Descricao,
 
+    [DataType(DataType.Date)]
     DateTime? DataOcorrencia,
 
-    [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
-    [DataType(DataType.Currency)]
     decimal Valor,
 
     [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
-    FormaPagamentoEnum FormaPagamento,
+    FormaPagamento FormaPagamento,
 
-    [Required(ErrorMessage = "O campo \"Categoria\" deve ser preenchido.")]
-    Guid CategoriaId,
+    List<Guid> CategoriaIds,
 
     [ValidateNever]
-    List<OpcaoCategoriaViewModel> Categorias
+    List<CategoriaDespesaViewModel> Categorias
 );
 
 public record EditarDespesaViewModel(
@@ -48,21 +40,19 @@ public record EditarDespesaViewModel(
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Descrição\" deve conter entre 2 e 100 caracteres.")]
     string Descricao,
 
+    [DataType(DataType.Date)]
     DateTime? DataOcorrencia,
 
-    [Required(ErrorMessage = "O campo \"Valor\" deve ser preenchido.")]
     [Range(0.01, double.MaxValue, ErrorMessage = "O campo \"Valor\" deve ser maior que zero.")]
-    [DataType(DataType.Currency)]
     decimal Valor,
 
     [Required(ErrorMessage = "O campo \"Forma de Pagamento\" deve ser preenchido.")]
-    FormaPagamentoEnum FormaPagamento,
+    FormaPagamento FormaPagamento,
 
-    [Required(ErrorMessage = "O campo \"Categoria\" deve ser preenchido.")]
-    Guid CategoriaId,
+    List<Guid> CategoriaIds,
 
     [ValidateNever]
-    List<OpcaoCategoriaViewModel> Categorias
+    List<CategoriaDespesaViewModel> Categorias
 );
 
 public record ExcluirDespesaViewModel(
@@ -70,7 +60,8 @@ public record ExcluirDespesaViewModel(
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId,
-    string CategoriaTitulo    
+    FormaPagamento FormaPagamento,
+    List<CategoriaDespesaViewModel> Categorias
 );
+
+public record CategoriaDespesaViewModel(Guid Id, string Titulo);

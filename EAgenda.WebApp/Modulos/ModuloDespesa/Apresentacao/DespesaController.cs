@@ -2,9 +2,8 @@ using AutoMapper;
 using FluentResults;
 using EAgenda.WebApp.Compartilhado.Apresentacao.Extensions;
 using EAgenda.WebApp.Modulos.ModuloDespesa.Aplicacao;
-using Microsoft.AspNetCore.Mvc;
-
 using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
+using Microsoft.AspNetCore.Mvc;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Apresentacao;
 
@@ -14,6 +13,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
     public ActionResult Listar()
     {
         List<ListarDespesasDto> dtos = servicoDespesa.SelecionarTodos();
+
         List<ListarDespesasViewModel> listarVms = mapeador.Map<List<ListarDespesasViewModel>>(dtos);
 
         return View(listarVms);
@@ -24,11 +24,11 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
     {
         CadastrarDespesaViewModel cadastrarVm = new CadastrarDespesaViewModel(
             string.Empty,
-            DateTime.Now,
+            DateTime.Today,
             0,
-            FormaPagamentoEnum.Pix,
-            Guid.Empty,
-            SelecionarCategorias()            
+            FormaPagamento.Pix,
+            [],
+            SelecionarCategorias()
         );
 
         return View(cadastrarVm);
@@ -41,6 +41,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
             return View(cadastrarVm with { Categorias = SelecionarCategorias() });
 
         CadastrarDespesaDto dto = mapeador.Map<CadastrarDespesaDto>(cadastrarVm);
+
         Result resultado = servicoDespesa.Cadastrar(dto);
 
         if (resultado.IsFailed)
@@ -78,6 +79,7 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
             return View(editarVm with { Categorias = SelecionarCategorias() });
 
         EditarDespesaDto dto = mapeador.Map<EditarDespesaDto>(editarVm);
+
         Result resultado = servicoDespesa.Editar(dto);
 
         if (resultado.IsFailed)
@@ -116,12 +118,12 @@ public class DespesaController(ServicoDespesa servicoDespesa, IMapper mapeador) 
             TempData.AddErrorMessage(resultado);
 
         return RedirectToAction(nameof(Listar));
-    } 
+    }
 
-    private List<OpcaoCategoriaViewModel> SelecionarCategorias()
+    private List<CategoriaDespesaViewModel> SelecionarCategorias()
     {
-        List<OpcaoCategoriaDto> dtos = servicoDespesa.SelecionarCategorias();
+        List<CategoriaDespesaDto> dtos = servicoDespesa.SelecionarCategorias();
 
-        return mapeador.Map<List<OpcaoCategoriaViewModel>>(dtos);
-    }   
+        return mapeador.Map<List<CategoriaDespesaViewModel>>(dtos);
+    }
 }

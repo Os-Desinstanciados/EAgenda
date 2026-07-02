@@ -1,39 +1,31 @@
-using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
 using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Aplicacao;
-
-
-public record OpcaoCategoriaDto(
-    Guid Id,
-    string Titulo
-);
 
 public record ListarDespesasDto(
     Guid Id,
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId,
-    string CategoriaTitulo   
+    FormaPagamento FormaPagamento,
+    List<CategoriaDespesaDto> Categorias
 );
 
 public record CadastrarDespesaDto(
     string Descricao,
-    DateTime DataOcorrencia,
+    DateTime? DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId              
+    FormaPagamento FormaPagamento,
+    List<Guid> CategoriaIds
 );
 
 public record EditarDespesaDto(
     Guid Id,
     string Descricao,
-    DateTime DataOcorrencia,
+    DateTime? DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId        
+    FormaPagamento FormaPagamento,
+    List<Guid> CategoriaIds
 );
 
 public record DetalhesDespesaDto(
@@ -41,7 +33,8 @@ public record DetalhesDespesaDto(
     string Descricao,
     DateTime DataOcorrencia,
     decimal Valor,
-    FormaPagamentoEnum FormaPagamento,
-    Guid CategoriaId,
-    string CategoriaTitulo   
+    FormaPagamento FormaPagamento,
+    List<CategoriaDespesaDto> Categorias
 );
+
+public record CategoriaDespesaDto(Guid Id, string Titulo);

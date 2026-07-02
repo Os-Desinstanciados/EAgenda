@@ -2,7 +2,7 @@ using System.ComponentModel;
 
 namespace EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 
-public enum FormaPagamentoEnum
+public enum FormaPagamento
 {
     [Description("Pix")]
     Pix,

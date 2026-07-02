@@ -7,12 +7,15 @@ public class DespesaProfile : Profile
 {
     public DespesaProfile()
     {
-        CreateMap<OpcaoCategoriaDto, OpcaoCategoriaViewModel>(); 
+        CreateMap<CategoriaDespesaDto, CategoriaDespesaViewModel>();
         CreateMap<ListarDespesasDto, ListarDespesasViewModel>();
         CreateMap<CadastrarDespesaViewModel, CadastrarDespesaDto>();
         CreateMap<EditarDespesaViewModel, EditarDespesaDto>();
+
         CreateMap<DetalhesDespesaDto, EditarDespesaViewModel>()
-            .ForCtorParam("Categorias", opt => opt.MapFrom(_ => new List<OpcaoCategoriaViewModel>()));        
+            .ForCtorParam("CategoriaIds", opt => opt.MapFrom(src => src.Categorias.Select(c => c.Id).ToList()))
+            .ForCtorParam("Categorias", opt => opt.MapFrom(_ => new List<CategoriaDespesaViewModel>()));
+
         CreateMap<DetalhesDespesaDto, ExcluirDespesaViewModel>();
     }
 }
