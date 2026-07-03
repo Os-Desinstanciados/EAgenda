@@ -7,7 +7,7 @@
 			"command": "dotnet",
 			"args": [
 				"build",
-				"c${workspaceFolder}/EAgenda.Web.Database/EAgenda.Web.Database.sqlproj"
+				"${workspaceFolder}/EAgenda.Web.Database/EAgenda.Web.Database.sqlproj"
 			],
 			"problemMatcher": "$sqlproj-problem-matcher",
 			"isBackground": true,
