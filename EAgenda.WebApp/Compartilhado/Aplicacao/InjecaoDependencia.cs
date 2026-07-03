@@ -3,6 +3,7 @@ using EAgenda.WebApp.Modulos.ModuloCategoria.Aplicacao;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Aplicacao;
 using EAgenda.WebApp.Modulos.ModuloContato.Aplicacao;
 using EAgenda.WebApp.Modulos.ModuloDespesa.Aplicacao;
+using EAgenda.WebApp.Modulos.ModuloTarefa.Aplicacao;
 
 namespace EAgenda.WebApp.Compartilhado.Aplicacao;
 
@@ -20,5 +21,6 @@ public static class InjecaoDependencia
         services.AddScoped<ServicoCompromisso>();
         services.AddScoped<ServicoCategoria>();
         services.AddScoped<ServicoDespesa>();
+        services.AddScoped<ServicoTarefa>();
     }
 }
