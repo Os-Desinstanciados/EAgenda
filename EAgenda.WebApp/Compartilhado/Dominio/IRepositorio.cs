@@ -7,5 +7,5 @@ public interface IRepositorio<T> where T : EntidadeBase<T>
     bool Excluir(Guid idSelecionado);
     T? SelecionarPorId(Guid idSelecionado);
     List<T> SelecionarTodos();
-    List<T> Filtrar(Predicate<T> filtro);
+    List<T> Filtrar(Func<T, bool> filtro);
 }
