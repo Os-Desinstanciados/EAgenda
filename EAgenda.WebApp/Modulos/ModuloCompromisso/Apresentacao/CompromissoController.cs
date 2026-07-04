@@ -2,6 +2,7 @@ using AutoMapper;
 using FluentResults;
 using EAgenda.WebApp.Compartilhado.Apresentacao.Extensions;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Aplicacao;
+using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
 using Microsoft.AspNetCore.Mvc;
 
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Apresentacao;
@@ -12,6 +13,7 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
     public ActionResult Listar()
     {
         List<ListarCompromissosDto> dtos = servicoCompromisso.SelecionarTodos();
+
         List<ListarCompromissosViewModel> listarVms = mapeador.Map<List<ListarCompromissosViewModel>>(dtos);
 
         return View(listarVms);
@@ -20,15 +22,16 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
     [HttpGet]
     public ActionResult Cadastrar()
     {
-        CadastrarCompromissoViewModel cadastrarVm = new(
+        CadastrarCompromissoViewModel cadastrarVm = new CadastrarCompromissoViewModel(
             string.Empty,
             DateTime.Today,
             TimeSpan.Zero,
             TimeSpan.Zero,
-            "Presencial",
-            string.Empty,
-            string.Empty,
-            null
+            TipoCompromisso.Presencial,
+            null,
+            null,
+            null,
+            SelecionarContatos()
         );
 
         return View(cadastrarVm);
@@ -38,16 +41,17 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
     public ActionResult Cadastrar(CadastrarCompromissoViewModel cadastrarVm)
     {
         if (!ModelState.IsValid)
-            return View(cadastrarVm);
+            return View(cadastrarVm with { Contatos = SelecionarContatos() });
 
         CadastrarCompromissoDto dto = mapeador.Map<CadastrarCompromissoDto>(cadastrarVm);
+
         Result resultado = servicoCompromisso.Cadastrar(dto);
 
         if (resultado.IsFailed)
         {
             ModelState.AddModelError(resultado);
 
-            return View(cadastrarVm);
+            return View(cadastrarVm with { Contatos = SelecionarContatos() });
         }
 
         return RedirectToAction(nameof(Listar));
@@ -65,7 +69,8 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
             return RedirectToAction(nameof(Listar));
         }
 
-        EditarCompromissoViewModel editarVm = mapeador.Map<EditarCompromissoViewModel>(resultado.Value);
+        EditarCompromissoViewModel editarVm =
+            mapeador.Map<EditarCompromissoViewModel>(resultado.Value) with { Contatos = SelecionarContatos() };
 
         return View(editarVm);
     }
@@ -74,16 +79,17 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
     public ActionResult Editar(EditarCompromissoViewModel editarVm)
     {
         if (!ModelState.IsValid)
-            return View(editarVm);
+            return View(editarVm with { Contatos = SelecionarContatos() });
 
         EditarCompromissoDto dto = mapeador.Map<EditarCompromissoDto>(editarVm);
+
         Result resultado = servicoCompromisso.Editar(dto);
 
         if (resultado.IsFailed)
         {
             ModelState.AddModelError(resultado);
 
-            return View(editarVm);
+            return View(editarVm with { Contatos = SelecionarContatos() });
         }
 
         return RedirectToAction(nameof(Listar));
@@ -115,5 +121,12 @@ public class CompromissoController(ServicoCompromisso servicoCompromisso, IMappe
             TempData.AddErrorMessage(resultado);
 
         return RedirectToAction(nameof(Listar));
+    }
+
+    private List<OpcaoContatoViewModel> SelecionarContatos()
+    {
+        List<OpcaoContatoDto> dtos = servicoCompromisso.SelecionarContatos();
+
+        return mapeador.Map<List<OpcaoContatoViewModel>>(dtos);
     }
 }

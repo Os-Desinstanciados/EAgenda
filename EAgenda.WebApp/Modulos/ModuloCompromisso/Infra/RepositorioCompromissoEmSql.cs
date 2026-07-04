@@ -1,99 +1,166 @@
+using Dapper;
 using EAgenda.WebApp.Compartilhado.Infra.Sql;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
+using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
 using Microsoft.Data.SqlClient;
-using Dapper;
 
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Infra;
 
-public sealed class RepositorioCompromissoEmSql(ISqlConnectionFactory connectionFactory)
-    : IRepositorioCompromisso
+public class RepositorioCompromissoEmSql(ISqlConnectionFactory connectionFactory) :
+    RepositorioBaseSql<Compromisso>(connectionFactory), IRepositorioCompromisso
 {
-    private const string InserirSql = """
-        INSERT INTO dbo.TBCompromisso 
-            (Id, Assunto, DataOcorrencia, HoraInicio, HoraTermino, TipoCompromisso, Local, Link, ContatoId)
-        VALUES 
-            (@Id, @Assunto, @DataOcorrencia, @HoraInicio, @HoraTermino, @TipoCompromisso, @Local, @Link, @ContatoId);
+    protected override string InserirSql => """
+        INSERT INTO dbo.TBCompromisso
+            (Id, Assunto, DataOcorrencia, HoraInicio, HoraTermino, Tipo, Local, Link, ContatoId)
+        VALUES
+            (@Id, @Assunto, @DataOcorrencia, @HoraInicio, @HoraTermino, @Tipo, @Local, @Link, @ContatoId);
     """;
 
-    private const string AtualizarSql = """
+    protected override string AtualizarSql => """
         UPDATE dbo.TBCompromisso
-        SET Assunto = @Assunto,
+        SET
+            Assunto = @Assunto,
             DataOcorrencia = @DataOcorrencia,
             HoraInicio = @HoraInicio,
             HoraTermino = @HoraTermino,
-            TipoCompromisso = @TipoCompromisso,
+            Tipo = @Tipo,
             Local = @Local,
             Link = @Link,
             ContatoId = @ContatoId
         WHERE Id = @Id;
     """;
 
-    private const string ExcluirSql = """
+    protected override string ExcluirSql => """
         DELETE FROM dbo.TBCompromisso
         WHERE Id = @Id;
     """;
 
-    private const string SelecionarTodosSql = """
-        SELECT Id, Assunto, DataOcorrencia, HoraInicio, HoraTermino, TipoCompromisso, Local, Link, ContatoId
-        FROM dbo.TBCompromisso
-        ORDER BY DataOcorrencia, HoraInicio;
+    protected override string SelecionarPorIdSql => """
+        SELECT
+            cp.Id AS CompromissoId,
+            cp.Assunto,
+            cp.DataOcorrencia,
+            cp.HoraInicio,
+            cp.HoraTermino,
+            cp.Tipo,
+            cp.Local,
+            cp.Link,
+            ct.Id AS ContatoId,
+            ct.Nome AS ContatoNome,
+            ct.Email AS ContatoEmail,
+            ct.Telefone AS ContatoTelefone,
+            ct.Cargo AS ContatoCargo,
+            ct.Empresa AS ContatoEmpresa
+        FROM dbo.TBCompromisso AS cp
+        LEFT JOIN dbo.TBContato AS ct
+            ON ct.Id = cp.ContatoId
+        WHERE cp.Id = @Id;
     """;
 
-    private const string SelecionarPorIdSql = """
-        SELECT Id, Assunto, DataOcorrencia, HoraInicio, HoraTermino, TipoCompromisso, Local, Link, ContatoId
-        FROM dbo.TBCompromisso
-        WHERE Id = @Id;
+    protected override string SelecionarTodosSql => """
+        SELECT
+            cp.Id AS CompromissoId,
+            cp.Assunto,
+            cp.DataOcorrencia,
+            cp.HoraInicio,
+            cp.HoraTermino,
+            cp.Tipo,
+            cp.Local,
+            cp.Link,
+            ct.Id AS ContatoId,
+            ct.Nome AS ContatoNome,
+            ct.Email AS ContatoEmail,
+            ct.Telefone AS ContatoTelefone,
+            ct.Cargo AS ContatoCargo,
+            ct.Empresa AS ContatoEmpresa
+        FROM dbo.TBCompromisso AS cp
+        LEFT JOIN dbo.TBContato AS ct
+            ON ct.Id = cp.ContatoId
+        ORDER BY cp.DataOcorrencia, cp.HoraInicio;
     """;
 
-    public void Cadastrar(Compromisso entidade)
+    public override Compromisso? SelecionarPorId(Guid idSelecionado)
     {
-        using SqlConnection conexao = connectionFactory.CreateConnection();
+        using SqlConnection conexao = AbrirConexao();
 
-        conexao.Open();
+        CompromissoRow? compromissoRow = conexao.QuerySingleOrDefault<CompromissoRow>(
+            SelecionarPorIdSql,
+            new { Id = idSelecionado }
+        );
 
-        conexao.Execute(InserirSql, entidade);
+        if (compromissoRow == null)
+            return null;
+
+        return MapearCompromisso(compromissoRow);
     }
 
-    public bool Editar(Guid idSelecionado, Compromisso entidadeAtualizada)
+    public override List<Compromisso> SelecionarTodos()
     {
-        entidadeAtualizada.Id = idSelecionado;
+        using SqlConnection conexao = AbrirConexao();
 
-        using SqlConnection conexao = connectionFactory.CreateConnection();
-
-        conexao.Open();
-
-        return conexao.Execute(AtualizarSql, entidadeAtualizada) > 0;
+        return conexao
+            .Query<CompromissoRow>(SelecionarTodosSql)
+            .Select(MapearCompromisso)
+            .ToList();
     }
 
-    public bool Excluir(Guid idSelecionado)
+    private static Compromisso MapearCompromisso(CompromissoRow row)
     {
-        using SqlConnection conexao = connectionFactory.CreateConnection();
-
-        conexao.Open();
-
-        return conexao.Execute(ExcluirSql, new { Id = idSelecionado }) > 0;
+        return new Compromisso
+        {
+            Id = row.CompromissoId,
+            Assunto = row.Assunto,
+            DataOcorrencia = row.DataOcorrencia.Date,
+            HoraInicio = row.HoraInicio,
+            HoraTermino = row.HoraTermino,
+            Tipo = row.Tipo,
+            Local = row.Local,
+            Link = row.Link,
+            Contato = row.ContatoId.HasValue
+                ? new Contato
+                {
+                    Id = row.ContatoId.Value,
+                    Nome = row.ContatoNome ?? string.Empty,
+                    Email = row.ContatoEmail ?? string.Empty,
+                    Telefone = row.ContatoTelefone ?? string.Empty,
+                    Cargo = row.ContatoCargo,
+                    Empresa = row.ContatoEmpresa
+                }
+                : null
+        };
     }
 
-    public Compromisso? SelecionarPorId(Guid idSelecionado)
+    protected override object CriarParametros(Compromisso compromisso)
     {
-        using SqlConnection conexao = connectionFactory.CreateConnection();
-
-        conexao.Open();
-
-        return conexao.QuerySingleOrDefault<Compromisso>(SelecionarPorIdSql, new { Id = idSelecionado });
+        return new
+        {
+            compromisso.Id,
+            compromisso.Assunto,
+            DataOcorrencia = compromisso.DataOcorrencia.Date,
+            compromisso.HoraInicio,
+            compromisso.HoraTermino,
+            Tipo = (int)compromisso.Tipo,
+            compromisso.Local,
+            compromisso.Link,
+            ContatoId = compromisso.Contato?.Id
+        };
     }
+}
 
-    public List<Compromisso> SelecionarTodos()
-    {
-        using SqlConnection conexao = connectionFactory.CreateConnection();
-
-        conexao.Open();
-
-        return conexao.Query<Compromisso>(SelecionarTodosSql).ToList();
-    }
-
-    public List<Compromisso> Filtrar(Predicate<Compromisso> filtro)
-    {
-        return SelecionarTodos().FindAll(filtro);
-    }
+public sealed class CompromissoRow
+{
+    public Guid CompromissoId { get; set; }
+    public string Assunto { get; set; } = string.Empty;
+    public DateTime DataOcorrencia { get; set; }
+    public TimeSpan HoraInicio { get; set; }
+    public TimeSpan HoraTermino { get; set; }
+    public TipoCompromisso Tipo { get; set; }
+    public string? Local { get; set; }
+    public string? Link { get; set; }
+    public Guid? ContatoId { get; set; }
+    public string? ContatoNome { get; set; }
+    public string? ContatoEmail { get; set; }
+    public string? ContatoTelefone { get; set; }
+    public string? ContatoCargo { get; set; }
+    public string? ContatoEmpresa { get; set; }
 }

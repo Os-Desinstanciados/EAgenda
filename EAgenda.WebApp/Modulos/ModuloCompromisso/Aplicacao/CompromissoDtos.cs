@@ -1,3 +1,5 @@
+using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
+
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Aplicacao;
 
 public record ListarCompromissosDto(
@@ -6,10 +8,11 @@ public record ListarCompromissosDto(
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    string TipoCompromisso,
+    TipoCompromisso Tipo,
     string? Local,
     string? Link,
-    Guid? ContatoId
+    Guid? ContatoId,
+    string? ContatoNome
 );
 
 public record CadastrarCompromissoDto(
@@ -17,7 +20,7 @@ public record CadastrarCompromissoDto(
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    string TipoCompromisso,
+    TipoCompromisso Tipo,
     string? Local,
     string? Link,
     Guid? ContatoId
@@ -29,7 +32,7 @@ public record EditarCompromissoDto(
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    string TipoCompromisso,
+    TipoCompromisso Tipo,
     string? Local,
     string? Link,
     Guid? ContatoId
@@ -41,8 +44,11 @@ public record DetalhesCompromissoDto(
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    string TipoCompromisso,
+    TipoCompromisso Tipo,
     string? Local,
     string? Link,
-    Guid? ContatoId
+    Guid? ContatoId,
+    string? ContatoNome
 );
+
+public record OpcaoContatoDto(Guid Id, string Nome);

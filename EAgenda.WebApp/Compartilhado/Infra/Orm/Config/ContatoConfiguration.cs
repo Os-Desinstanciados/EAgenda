@@ -2,7 +2,7 @@ using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
 
-namespace eAgenda.WebApp.Compartilhado.Infra.Orm.Config;
+namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Config;
 
 public sealed class ContatoConfiguration : IEntityTypeConfiguration<Contato>
 {

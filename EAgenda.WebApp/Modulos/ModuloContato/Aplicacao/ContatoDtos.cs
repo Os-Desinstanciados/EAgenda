@@ -5,16 +5,16 @@ public record ListarContatosDto(
     string Nome,
     string Email,
     string Telefone,
-    string Cargo,
-    string Empresa
+    string? Cargo,
+    string? Empresa
 );
 
 public record CadastrarContatoDto(
     string Nome,
     string Email,
     string Telefone,
-    string Cargo,
-    string Empresa
+    string? Cargo,
+    string? Empresa
 );
 
 public record EditarContatoDto(
@@ -22,8 +22,8 @@ public record EditarContatoDto(
     string Nome,
     string Email,
     string Telefone,
-    string Cargo,
-    string Empresa
+    string? Cargo,
+    string? Empresa
 );
 
 public record DetalhesContatoDto(
@@ -31,6 +31,6 @@ public record DetalhesContatoDto(
     string Nome,
     string Email,
     string Telefone,
-    string Cargo,
-    string Empresa
+    string? Cargo,
+    string? Empresa
 );

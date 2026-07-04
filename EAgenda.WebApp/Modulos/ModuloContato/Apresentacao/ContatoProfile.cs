@@ -1,5 +1,4 @@
 using AutoMapper;
-using EAgenda.WebApp.Modulos.ModuloCompromisso.Aplicacao;
 using EAgenda.WebApp.Modulos.ModuloContato.Aplicacao;
 
 namespace EAgenda.WebApp.Modulos.ModuloContato.Apresentacao;
@@ -10,7 +9,7 @@ public class ContatoProfile : Profile
     {
         CreateMap<ListarContatosDto, ListarContatosViewModel>();
         CreateMap<CadastrarContatoViewModel, CadastrarContatoDto>();
-        CreateMap<EditarContatoViewModel, EditarCompromissoDto>();
+        CreateMap<EditarContatoViewModel, EditarContatoDto>();
         CreateMap<DetalhesContatoDto, EditarContatoViewModel>();
         CreateMap<DetalhesContatoDto, ExcluirContatoViewModel>();
     }

@@ -1,18 +1,22 @@
 using FluentResults;
 using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
 using EAgenda.WebApp.Compartilhado.Aplicacao;
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 
 namespace EAgenda.WebApp.Modulos.ModuloCategoria.Aplicacao;
 
 public class ServicoCategoria : ServicoBase<Categoria>
 {
     private readonly IRepositorioCategoria repositorioCategoria;
+    private readonly IRepositorioDespesa repositorioDespesa;
 
     public ServicoCategoria(
-        IRepositorioCategoria repositorioCategoria
+        IRepositorioCategoria repositorioCategoria,
+        IRepositorioDespesa repositorioDespesa
     )
     {
         this.repositorioCategoria = repositorioCategoria;
+        this.repositorioDespesa = repositorioDespesa;
     }
 
     public Result Cadastrar(CadastrarCategoriaDto dto)
@@ -59,6 +63,9 @@ public class ServicoCategoria : ServicoBase<Categoria>
         if (categoria == null)
             return Falha(string.Empty, "Categoria não encontrada.");
 
+        if (PossuiDespesasVinculadas(id))
+            return Falha(string.Empty, "Não é possível excluir esta categoria, pois ela possui despesas vinculadas.");
+
         repositorioCategoria.Excluir(id);
 
         return Result.Ok();
@@ -92,6 +99,13 @@ public class ServicoCategoria : ServicoBase<Categoria>
                 c.Id != idIgnorado &&
                 NormalizarTitulo(c.Titulo) == tituloNormalizado
             );
+    }
+
+    private bool PossuiDespesasVinculadas(Guid categoriaId)
+    {
+        return repositorioDespesa
+            .SelecionarTodos()
+            .Any(d => d.Categorias.Any(c => c.Id == categoriaId));
     }
 
     private static string NormalizarTitulo(string titulo)

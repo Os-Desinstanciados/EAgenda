@@ -10,7 +10,7 @@ public sealed class RepositorioContatoEmOrm(EAgendaDbContext dbContext) : IRepos
     {
         dbContext.Contatos.Add(entidade);
 
-        dbContext.SaveChanges();
+        dbContext.SaveChanges(); // commit
     }
 
     public bool Editar(Guid idSelecionado, Contato entidadeAtualizada)
