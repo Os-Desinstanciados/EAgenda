@@ -28,7 +28,6 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Cargo")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -38,7 +37,6 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Empresa")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 

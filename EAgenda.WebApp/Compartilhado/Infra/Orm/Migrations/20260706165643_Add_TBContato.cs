@@ -19,8 +19,8 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                     Nome = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
                     Email = table.Column<string>(type: "nvarchar(255)", maxLength: 255, nullable: false),
                     Telefone = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
-                    Cargo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false),
-                    Empresa = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: false)
+                    Cargo = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true),
+                    Empresa = table.Column<string>(type: "nvarchar(100)", maxLength: 100, nullable: true)
                 },
                 constraints: table =>
                 {

@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
 {
     [DbContext(typeof(EAgendaDbContext))]
-    [Migration("20260703182754_Add_TBContato")]
+    [Migration("20260706165643_Add_TBContato")]
     partial class Add_TBContato
     {
         /// <inheritdoc />
@@ -31,7 +31,6 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Cargo")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
@@ -41,7 +40,6 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                         .HasColumnType("nvarchar(255)");
 
                     b.Property<string>("Empresa")
-                        .IsRequired()
                         .HasMaxLength(100)
                         .HasColumnType("nvarchar(100)");
 
