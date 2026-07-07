@@ -17,11 +17,7 @@ public sealed class EAgendaDbContext(DbContextOptions<EAgendaDbContext> options)
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {            
-        modelBuilder.Ignore<ItemTarefa>();
-        modelBuilder.Ignore<Tarefa>();        
-
-        modelBuilder.ApplyConfigurationsFromAssembly(typeof(EAgendaDbContext).Assembly);
-        
+    {                 
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(EAgendaDbContext).Assembly);        
     }
 }
