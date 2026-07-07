@@ -1,4 +1,3 @@
-using EAgenda.WebApp.Compartilhado.Infra.Orm.Config;
 using EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
 using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
@@ -18,14 +17,13 @@ public sealed class EAgendaDbContext(DbContextOptions<EAgendaDbContext> options)
     public DbSet<Tarefa> Tarefas => Set<Tarefa>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
-    {
-        // TODO: Implementar EntityTypeConfiguration restantes
-        modelBuilder.Ignore<Compromisso>();
+    {            
         modelBuilder.Ignore<Categoria>();
         modelBuilder.Ignore<Despesa>();
         modelBuilder.Ignore<ItemTarefa>();
-        modelBuilder.Ignore<Tarefa>();
+        modelBuilder.Ignore<Tarefa>();        
 
-        modelBuilder.ApplyConfiguration(new ContatoConfiguration());
+        modelBuilder.ApplyConfigurationsFromAssembly(typeof(EAgendaDbContext).Assembly);
+        
     }
 }

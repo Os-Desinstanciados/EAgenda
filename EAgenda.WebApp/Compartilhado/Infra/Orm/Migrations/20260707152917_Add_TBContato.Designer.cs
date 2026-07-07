@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
 {
     [DbContext(typeof(EAgendaDbContext))]
-    [Migration("20260706165643_Add_TBContato")]
+    [Migration("20260707152917_Add_TBContato")]
     partial class Add_TBContato
     {
         /// <inheritdoc />
@@ -24,6 +24,47 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio.Compromisso", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Assunto")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<Guid?>("ContatoId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("DataOcorrencia")
+                        .HasColumnType("date");
+
+                    b.Property<TimeSpan>("HoraInicio")
+                        .HasColumnType("time");
+
+                    b.Property<TimeSpan>("HoraTermino")
+                        .HasColumnType("time");
+
+                    b.Property<string>("Link")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Local")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
+                    b.Property<int>("Tipo")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id")
+                        .HasName("PK_TBCompromisso");
+
+                    b.HasIndex("ContatoId");
+
+                    b.ToTable("TBCompromisso", (string)null);
+                });
 
             modelBuilder.Entity("EAgenda.WebApp.Modulos.ModuloContato.Dominio.Contato", b =>
                 {
@@ -65,6 +106,17 @@ namespace EAgenda.WebApp.Compartilhado.Infra.Orm.Migrations
                         .HasDatabaseName("UQ_TBContato_Telefone");
 
                     b.ToTable("TBContato", (string)null);
+                });
+
+            modelBuilder.Entity("EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio.Compromisso", b =>
+                {
+                    b.HasOne("EAgenda.WebApp.Modulos.ModuloContato.Dominio.Contato", "Contato")
+                        .WithMany()
+                        .HasForeignKey("ContatoId")
+                        .OnDelete(DeleteBehavior.NoAction)
+                        .HasConstraintName("FK_TBCompromisso_TBContato");
+
+                    b.Navigation("Contato");
                 });
 #pragma warning restore 612, 618
         }
