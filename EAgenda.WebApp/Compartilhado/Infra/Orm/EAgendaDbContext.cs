@@ -18,7 +18,6 @@ public sealed class EAgendaDbContext(DbContextOptions<EAgendaDbContext> options)
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {            
-        modelBuilder.Ignore<Categoria>();
         modelBuilder.Ignore<Despesa>();
         modelBuilder.Ignore<ItemTarefa>();
         modelBuilder.Ignore<Tarefa>();        
