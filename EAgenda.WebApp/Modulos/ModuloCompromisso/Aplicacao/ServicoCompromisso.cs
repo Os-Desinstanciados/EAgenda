@@ -1,34 +1,49 @@
 using FluentResults;
 using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
+using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
+using EAgenda.WebApp.Compartilhado.Aplicacao;
 
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Aplicacao;
 
-public class ServicoCompromisso
+public class ServicoCompromisso : ServicoBase<Compromisso>
 {
     private readonly IRepositorioCompromisso repositorioCompromisso;
+    private readonly IRepositorioContato repositorioContato;
 
-    public ServicoCompromisso(IRepositorioCompromisso repositorioCompromisso)
+    public ServicoCompromisso(
+        IRepositorioCompromisso repositorioCompromisso,
+        IRepositorioContato repositorioContato
+    )
     {
         this.repositorioCompromisso = repositorioCompromisso;
+        this.repositorioContato = repositorioContato;
     }
 
     public Result Cadastrar(CadastrarCompromissoDto dto)
     {
-        Compromisso novoCompromisso = new(
+        Result<Contato?> resultadoContato = SelecionarContatoOpcional(dto.ContatoId);
+
+        if (resultadoContato.IsFailed)
+            return resultadoContato.ToResult();
+
+        Compromisso novoCompromisso = new Compromisso(
             dto.Assunto,
             dto.DataOcorrencia,
             dto.HoraInicio,
             dto.HoraTermino,
-            dto.TipoCompromisso,
+            dto.Tipo,
             dto.Local,
             dto.Link,
-            dto.ContatoId
+            resultadoContato.Value
         );
 
         Result resultadoValidacao = ValidarEntidade(novoCompromisso);
 
         if (resultadoValidacao.IsFailed)
             return resultadoValidacao;
+
+        if (ExisteConflitoDeHorario(novoCompromisso))
+            return Falha(string.Empty, "Já existe um compromisso cadastrado neste intervalo de horário.");
 
         repositorioCompromisso.Cadastrar(novoCompromisso);
 
@@ -37,15 +52,20 @@ public class ServicoCompromisso
 
     public Result Editar(EditarCompromissoDto dto)
     {
-        Compromisso compromissoAtualizado = new(
+        Result<Contato?> resultadoContato = SelecionarContatoOpcional(dto.ContatoId);
+
+        if (resultadoContato.IsFailed)
+            return resultadoContato.ToResult();
+
+        Compromisso compromissoAtualizado = new Compromisso(
             dto.Assunto,
             dto.DataOcorrencia,
             dto.HoraInicio,
             dto.HoraTermino,
-            dto.TipoCompromisso,
+            dto.Tipo,
             dto.Local,
             dto.Link,
-            dto.ContatoId
+            resultadoContato.Value
         );
 
         Result resultadoValidacao = ValidarEntidade(compromissoAtualizado);
@@ -53,10 +73,13 @@ public class ServicoCompromisso
         if (resultadoValidacao.IsFailed)
             return resultadoValidacao;
 
+        if (ExisteConflitoDeHorario(compromissoAtualizado, dto.Id))
+            return Falha(string.Empty, "Já existe um compromisso cadastrado neste intervalo de horário.");
+
         bool conseguiuEditar = repositorioCompromisso.Editar(dto.Id, compromissoAtualizado);
 
         if (!conseguiuEditar)
-            return Result.Fail("Compromisso nao encontrado.");
+            return Falha(string.Empty, "Compromisso não encontrado.");
 
         return Result.Ok();
     }
@@ -66,7 +89,7 @@ public class ServicoCompromisso
         Compromisso? compromisso = repositorioCompromisso.SelecionarPorId(id);
 
         if (compromisso == null)
-            return Result.Fail("Compromisso nao encontrado.");
+            return Falha(string.Empty, "Compromisso não encontrado.");
 
         repositorioCompromisso.Excluir(id);
 
@@ -83,10 +106,11 @@ public class ServicoCompromisso
                 c.DataOcorrencia,
                 c.HoraInicio,
                 c.HoraTermino,
-                c.TipoCompromisso,
+                c.Tipo,
                 c.Local,
                 c.Link,
-                c.ContatoId
+                c.Contato?.Id,
+                c.Contato?.Nome
             ))
             .ToList();
     }
@@ -96,7 +120,7 @@ public class ServicoCompromisso
         Compromisso? compromisso = repositorioCompromisso.SelecionarPorId(id);
 
         if (compromisso == null)
-            return Result.Fail("Compromisso nao encontrado.");
+            return Result.Fail("Compromisso não encontrado.");
 
         return Result.Ok(new DetalhesCompromissoDto(
             compromisso.Id,
@@ -104,20 +128,44 @@ public class ServicoCompromisso
             compromisso.DataOcorrencia,
             compromisso.HoraInicio,
             compromisso.HoraTermino,
-            compromisso.TipoCompromisso,
+            compromisso.Tipo,
             compromisso.Local,
             compromisso.Link,
-            compromisso.ContatoId
+            compromisso.Contato?.Id,
+            compromisso.Contato?.Nome
         ));
     }
 
-    private static Result ValidarEntidade(Compromisso compromisso)
+    public List<OpcaoContatoDto> SelecionarContatos()
     {
-        List<string> erros = compromisso.Validar();
+        return repositorioContato
+            .SelecionarTodos()
+            .Select(c => new OpcaoContatoDto(c.Id, c.Nome))
+            .ToList();
+    }
 
-        if (erros.Count == 0)
-            return Result.Ok();
+    private Result<Contato?> SelecionarContatoOpcional(Guid? contatoId)
+    {
+        if (contatoId == null || contatoId == Guid.Empty)
+            return Result.Ok<Contato?>(null);
 
-        return Result.Fail(new Error(erros.First()).WithMetadata("Campo", string.Empty));
+        Contato? contato = repositorioContato.SelecionarPorId(contatoId.Value);
+
+        if (contato == null)
+            return Result.Fail<Contato?>(new Error("Selecione um contato válido.").WithMetadata("Campo", nameof(CadastrarCompromissoDto.ContatoId)));
+
+        return Result.Ok<Contato?>(contato);
+    }
+
+    private bool ExisteConflitoDeHorario(Compromisso compromisso, Guid? idIgnorado = null)
+    {
+        return repositorioCompromisso
+            .SelecionarTodos()
+            .Any(c =>
+                c.Id != idIgnorado &&
+                c.DataOcorrencia.Date == compromisso.DataOcorrencia.Date &&
+                compromisso.HoraInicio < c.HoraTermino &&
+                compromisso.HoraTermino > c.HoraInicio
+            );
     }
 }

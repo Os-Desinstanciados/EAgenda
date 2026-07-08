@@ -51,9 +51,9 @@ public abstract class RepositorioBaseSql<T>(
         return conexao.Query<T>(SelecionarTodosSql).ToList();
     }
 
-    public List<T> Filtrar(Predicate<T> filtro)
+    public List<T> Filtrar(Func<T, bool> filtro)
     {
-        return SelecionarTodos().FindAll(filtro);
+        return SelecionarTodos().Where(filtro).ToList();
     }
 
     protected SqlConnection AbrirConexao()

@@ -5,7 +5,7 @@ using EAgenda.WebApp.Compartilhado.Infra;
 var builder = WebApplication.CreateBuilder(args);
 
 // Configuração do container de injeção de dependência
-builder.Services.AddInfraRepositories();
+builder.Services.AddInfraRepositories(builder.Configuration);
 
 builder.Services.AddApplicationServices(builder.Configuration, builder.Logging);
 

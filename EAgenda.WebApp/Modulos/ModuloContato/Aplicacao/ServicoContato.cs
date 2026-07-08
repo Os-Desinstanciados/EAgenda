@@ -1,20 +1,39 @@
 using FluentResults;
 using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
+using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
+using EAgenda.WebApp.Compartilhado.Aplicacao;
 
 namespace EAgenda.WebApp.Modulos.ModuloContato.Aplicacao;
 
-public class ServicoContato
+public class ServicoContato : ServicoBase<Contato>
 {
     private readonly IRepositorioContato repositorioContato;
+    private readonly IRepositorioCompromisso repositorioCompromisso;
 
-    public ServicoContato(IRepositorioContato repositorioContato)
+    public ServicoContato(
+        IRepositorioContato repositorioContato,
+        IRepositorioCompromisso repositorioCompromisso
+    )
     {
         this.repositorioContato = repositorioContato;
+        this.repositorioCompromisso = repositorioCompromisso;
     }
 
     public Result Cadastrar(CadastrarContatoDto dto)
     {
-        Contato novoContato = new(dto.Nome, dto.Email, dto.Telefone, dto.Cargo, dto.Empresa);
+        if (ExisteContatoComMesmoEmail(dto.Email))
+            return Falha(nameof(dto.Email), "Já existe um contato com este email.");
+
+        if (ExisteContatoComMesmoTelefone(dto.Telefone))
+            return Falha(nameof(dto.Telefone), "Já existe um contato com este telefone.");
+
+        Contato novoContato = new Contato(
+            dto.Nome,
+            dto.Email,
+            dto.Telefone,
+            dto.Cargo,
+            dto.Empresa
+        );
 
         Result resultadoValidacao = ValidarEntidade(novoContato);
 
@@ -28,7 +47,19 @@ public class ServicoContato
 
     public Result Editar(EditarContatoDto dto)
     {
-        Contato contatoAtualizado = new(dto.Nome, dto.Email, dto.Telefone, dto.Cargo, dto.Empresa);
+        if (ExisteContatoComMesmoEmail(dto.Email, dto.Id))
+            return Falha(nameof(dto.Email), "Já existe um contato com este email.");
+
+        if (ExisteContatoComMesmoTelefone(dto.Telefone, dto.Id))
+            return Falha(nameof(dto.Telefone), "Já existe um contato com este telefone.");
+
+        Contato contatoAtualizado = new Contato(
+            dto.Nome,
+            dto.Email,
+            dto.Telefone,
+            dto.Cargo,
+            dto.Empresa
+        );
 
         Result resultadoValidacao = ValidarEntidade(contatoAtualizado);
 
@@ -38,7 +69,7 @@ public class ServicoContato
         bool conseguiuEditar = repositorioContato.Editar(dto.Id, contatoAtualizado);
 
         if (!conseguiuEditar)
-            return Result.Fail("Contato nao encontrado.");
+            return Falha(string.Empty, "Contato não encontrado.");
 
         return Result.Ok();
     }
@@ -48,7 +79,10 @@ public class ServicoContato
         Contato? contato = repositorioContato.SelecionarPorId(id);
 
         if (contato == null)
-            return Result.Fail("Contato nao encontrado.");
+            return Falha(string.Empty, "Contato não encontrado.");
+
+        // if (PossuiCompromissosVinculados(id))
+        //     return Falha(string.Empty, "Não é possível excluir este contato, pois ele possui compromissos vinculados.");
 
         repositorioContato.Excluir(id);
 
@@ -68,7 +102,7 @@ public class ServicoContato
         Contato? contato = repositorioContato.SelecionarPorId(id);
 
         if (contato == null)
-            return Result.Fail("Contato nao encontrado.");
+            return Result.Fail("Contato não encontrado.");
 
         return Result.Ok(new DetalhesContatoDto(
             contato.Id,
@@ -80,13 +114,44 @@ public class ServicoContato
         ));
     }
 
-    private static Result ValidarEntidade(Contato contato)
+    private bool ExisteContatoComMesmoEmail(string email, Guid? idIgnorado = null)
     {
-        List<string> erros = contato.Validar();
+        string emailNormalizado = NormalizarEmail(email);
 
-        if (erros.Count == 0)
-            return Result.Ok();
+        return repositorioContato
+            .SelecionarTodos()
+            .Any(c =>
+                c.Id != idIgnorado &&
+                NormalizarEmail(c.Email) == emailNormalizado
+            );
+    }
 
-        return Result.Fail(new Error(erros.First()).WithMetadata("Campo", string.Empty));
+    private bool ExisteContatoComMesmoTelefone(string telefone, Guid? idIgnorado = null)
+    {
+        string telefoneNormalizado = NormalizarTelefone(telefone);
+
+        return repositorioContato
+            .SelecionarTodos()
+            .Any(c =>
+                c.Id != idIgnorado &&
+                NormalizarTelefone(c.Telefone) == telefoneNormalizado
+            );
+    }
+
+    private bool PossuiCompromissosVinculados(Guid contatoId)
+    {
+        return repositorioCompromisso
+            .SelecionarTodos()
+            .Any(c => c.Contato?.Id == contatoId);
+    }
+
+    private static string NormalizarEmail(string email)
+    {
+        return email.Trim().ToLowerInvariant();
+    }
+
+    private static string NormalizarTelefone(string telefone)
+    {
+        return new string(telefone.Where(char.IsDigit).ToArray());
     }
 }

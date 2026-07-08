@@ -1,10 +1,12 @@
 using EAgenda.WebApp.Compartilhado.Dominio;
+using EAgenda.WebApp.Modulos.ModuloDespesa.Dominio;
 
 namespace EAgenda.WebApp.Modulos.ModuloCategoria.Dominio;
 
 public class Categoria : EntidadeBase<Categoria>
 {
     public string Titulo { get; set; } = string.Empty;
+    public List<Despesa> Despesas { get; set; } = new List<Despesa>();
 
     public Categoria()
     {

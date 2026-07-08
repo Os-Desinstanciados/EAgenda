@@ -1,4 +1,6 @@
 using System.ComponentModel.DataAnnotations;
+using EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
+using Microsoft.AspNetCore.Mvc.ModelBinding.Validation;
 
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Apresentacao;
 
@@ -8,61 +10,77 @@ public record ListarCompromissosViewModel(
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
     TimeSpan HoraTermino,
-    string TipoCompromisso,
+    TipoCompromisso Tipo,
     string? Local,
-    string? Link
+    string? Link,
+    Guid? ContatoId,
+    string? ContatoNome
 );
 
 public record CadastrarCompromissoViewModel(
-
     [Required(ErrorMessage = "O campo \"Assunto\" deve ser preenchido.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Assunto\" deve conter entre 2 e 100 caracteres.")]
     string Assunto,
 
-    [Required(ErrorMessage = "A data é obrigatória.")]
+    [Required(ErrorMessage = "O campo \"Data de Ocorrência\" deve ser preenchido.")]
+    [DataType(DataType.Date)]
     DateTime DataOcorrencia,
 
-    [Required(ErrorMessage = "A hora inicial é obrigatória.")]
+    [Required(ErrorMessage = "O campo \"Hora de Início\" deve ser preenchido.")]
+    [DataType(DataType.Time)]
     TimeSpan HoraInicio,
 
-    [Required(ErrorMessage = "A hora final é obrigatória.")]
+    [Required(ErrorMessage = "O campo \"Hora de Término\" deve ser preenchido.")]
+    [DataType(DataType.Time)]
     TimeSpan HoraTermino,
 
-    [Required(ErrorMessage = "Selecione o tipo do compromisso.")]
-    string TipoCompromisso,
+    [Required(ErrorMessage = "O campo \"Tipo de Compromisso\" deve ser preenchido.")]
+    TipoCompromisso Tipo,
 
+    [StringLength(255, ErrorMessage = "O campo \"Local\" deve conter no máximo 255 caracteres.")]
     string? Local,
 
+    [StringLength(500, ErrorMessage = "O campo \"Link\" deve conter no máximo 500 caracteres.")]
     string? Link,
 
-    Guid? ContatoId
+    Guid? ContatoId,
+
+    [ValidateNever]
+    List<OpcaoContatoViewModel> Contatos
 );
 
 public record EditarCompromissoViewModel(
-
     Guid Id,
 
     [Required(ErrorMessage = "O campo \"Assunto\" deve ser preenchido.")]
     [StringLength(100, MinimumLength = 2, ErrorMessage = "O campo \"Assunto\" deve conter entre 2 e 100 caracteres.")]
     string Assunto,
 
-    [Required]
+    [Required(ErrorMessage = "O campo \"Data de Ocorrência\" deve ser preenchido.")]
+    [DataType(DataType.Date)]
     DateTime DataOcorrencia,
 
-    [Required]
+    [Required(ErrorMessage = "O campo \"Hora de Início\" deve ser preenchido.")]
+    [DataType(DataType.Time)]
     TimeSpan HoraInicio,
 
-    [Required]
+    [Required(ErrorMessage = "O campo \"Hora de Término\" deve ser preenchido.")]
+    [DataType(DataType.Time)]
     TimeSpan HoraTermino,
 
-    [Required]
-    string TipoCompromisso,
+    [Required(ErrorMessage = "O campo \"Tipo de Compromisso\" deve ser preenchido.")]
+    TipoCompromisso Tipo,
 
+    [StringLength(255, ErrorMessage = "O campo \"Local\" deve conter no máximo 255 caracteres.")]
     string? Local,
 
+    [StringLength(500, ErrorMessage = "O campo \"Link\" deve conter no máximo 500 caracteres.")]
     string? Link,
 
-    Guid? ContatoId
+    Guid? ContatoId,
+
+    [ValidateNever]
+    List<OpcaoContatoViewModel> Contatos
 );
 
 public record ExcluirCompromissoViewModel(
@@ -70,5 +88,12 @@ public record ExcluirCompromissoViewModel(
     string Assunto,
     DateTime DataOcorrencia,
     TimeSpan HoraInicio,
-    TimeSpan HoraTermino
+    TimeSpan HoraTermino,
+    TipoCompromisso Tipo,
+    string? Local,
+    string? Link,
+    Guid? ContatoId,
+    string? ContatoNome
 );
+
+public record OpcaoContatoViewModel(Guid Id, string Nome);

@@ -1,25 +1,26 @@
+using System.Text.RegularExpressions;
 using EAgenda.WebApp.Compartilhado.Dominio;
 
 namespace EAgenda.WebApp.Modulos.ModuloContato.Dominio;
 
 public class Contato : EntidadeBase<Contato>
 {
-    public string Nome { get; set; }
-    public string Email { get; set; }
-    public string Telefone { get; set; }
-    public string Cargo { get; set; }
-    public string Empresa { get; set; }
+    public string Nome { get; set; } = string.Empty;
+    public string Email { get; set; } = string.Empty;
+    public string Telefone { get; set; } = string.Empty;
+    public string? Cargo { get; set; }
+    public string? Empresa { get; set; }
 
     public Contato()
     {
     }
-    
+
     public Contato(
         string nome,
         string email,
         string telefone,
-        string cargo,
-        string empresa
+        string? cargo,
+        string? empresa
     ) : this()
     {
         Nome = nome;
@@ -33,27 +34,30 @@ public class Contato : EntidadeBase<Contato>
     {
         List<string> erros = [];
 
-        if (string.IsNullOrWhiteSpace(Nome))
-            erros.Add("O nome é obrigatório.");
+        if (string.IsNullOrWhiteSpace(Nome) || Nome.Length < 2 || Nome.Length > 100)
+            erros.Add("O campo \"Nome\" deve conter entre 2 e 100 caracteres.");
 
-        if (Nome.Length < 3 || Nome.Length > 100)
-            erros.Add("O nome deve conter entre 3 e 100 caracteres.");
+        if (!Regex.IsMatch(Email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$"))
+            erros.Add("O campo \"E-mail\" deve conter um endereço de e-mail válido.");
 
-        if (string.IsNullOrWhiteSpace(Email))
-            erros.Add("O e-mail é obrigatório.");
+        if (!Regex.IsMatch(Telefone, @"^\(\d{2}\) \d{4,5}-\d{4}$"))
+            erros.Add("O campo \"Telefone\" deve estar no formato (XX) XXXX-XXXX ou (XX) XXXXX-XXXX.");
 
-        if (string.IsNullOrWhiteSpace(Telefone))
-            erros.Add("O telefone é obrigatório.");
+        if (!string.IsNullOrWhiteSpace(Cargo) && Cargo.Length > 100)
+            erros.Add("O campo \"Cargo\" deve conter no máximo 100 caracteres.");
+
+        if (!string.IsNullOrWhiteSpace(Empresa) && Empresa.Length > 100)
+            erros.Add("O campo \"Empresa\" deve conter no máximo 100 caracteres.");
 
         return erros;
     }
 
-    public override void Atualizar(Contato registroAtualizado)
+    public override void Atualizar(Contato entidadeAtualizada)
     {
-        Nome = registroAtualizado.Nome;
-        Email = registroAtualizado.Email;
-        Telefone = registroAtualizado.Telefone;
-        Cargo = registroAtualizado.Cargo;
-        Empresa = registroAtualizado.Empresa;
+        Nome = entidadeAtualizada.Nome;
+        Email = entidadeAtualizada.Email;
+        Telefone = entidadeAtualizada.Telefone;
+        Cargo = entidadeAtualizada.Cargo;
+        Empresa = entidadeAtualizada.Empresa;
     }
 }

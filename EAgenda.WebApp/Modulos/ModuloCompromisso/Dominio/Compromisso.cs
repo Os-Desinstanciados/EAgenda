@@ -1,85 +1,90 @@
 using EAgenda.WebApp.Compartilhado.Dominio;
+using EAgenda.WebApp.Modulos.ModuloContato.Dominio;
 
 namespace EAgenda.WebApp.Modulos.ModuloCompromisso.Dominio;
 
 public class Compromisso : EntidadeBase<Compromisso>
 {
-    public string Assunto { get; set; }
-    public DateTime DataOcorrencia { get; set; }
+    public string Assunto { get; set; } = string.Empty;
+    public DateTime DataOcorrencia { get; set; } = DateTime.Today;
     public TimeSpan HoraInicio { get; set; }
     public TimeSpan HoraTermino { get; set; }
-    public string TipoCompromisso { get; set; }
+    public TipoCompromisso Tipo { get; set; }
     public string? Local { get; set; }
     public string? Link { get; set; }
-    public Guid? ContatoId { get; set; }
-
+    public Contato? Contato { get; set; }
 
     public Compromisso()
     {
     }
-    
+
     public Compromisso(
         string assunto,
         DateTime dataOcorrencia,
         TimeSpan horaInicio,
         TimeSpan horaTermino,
-        string tipoCompromisso,
+        TipoCompromisso tipo,
         string? local,
         string? link,
-        Guid? contatoId
-    )
+        Contato? contato
+    ) : this()
     {
-        Id = Guid.NewGuid();
         Assunto = assunto;
-        DataOcorrencia = dataOcorrencia;
+        DataOcorrencia = dataOcorrencia.Date;
         HoraInicio = horaInicio;
         HoraTermino = horaTermino;
-        TipoCompromisso = tipoCompromisso;
+        Tipo = tipo;
         Local = local;
         Link = link;
-        ContatoId = contatoId;
+        Contato = contato;
     }
 
     public override List<string> Validar()
     {
-        List<string> erros = new();
+        List<string> erros = [];
 
         if (string.IsNullOrWhiteSpace(Assunto) || Assunto.Length < 2 || Assunto.Length > 100)
-            erros.Add("O assunto deve conter entre 2 e 100 caracteres.");
+            erros.Add("O campo \"Assunto\" deve conter entre 2 e 100 caracteres.");
 
         if (DataOcorrencia == default)
-            erros.Add("A data de ocorrência é obrigatória.");
+            erros.Add("O campo \"Data de Ocorrência\" deve ser preenchido.");
 
         if (HoraInicio == default)
-            erros.Add("A hora de início é obrigatória.");
+            erros.Add("O campo \"Hora de Início\" deve ser preenchido.");
 
         if (HoraTermino == default)
-            erros.Add("A hora de término é obrigatória.");
+            erros.Add("O campo \"Hora de Término\" deve ser preenchido.");
 
         if (HoraTermino <= HoraInicio)
-            erros.Add("A hora de término deve ser maior que a hora de início.");
+            erros.Add("A hora de término deve ser posterior à hora de início.");
 
-        if (string.IsNullOrWhiteSpace(TipoCompromisso))
-            erros.Add("O tipo de compromisso é obrigatório.");
+        if (!Enum.IsDefined(Tipo))
+            erros.Add("O campo \"Tipo de Compromisso\" deve ser preenchido.");
 
-        if (TipoCompromisso == "Presencial" && string.IsNullOrWhiteSpace(Local))
-            erros.Add("O local é obrigatório para compromissos presenciais.");
+        if (Tipo == TipoCompromisso.Presencial && string.IsNullOrWhiteSpace(Local))
+            erros.Add("O campo \"Local\" deve ser preenchido para compromissos presenciais.");
 
-        if (TipoCompromisso == "Remoto" && string.IsNullOrWhiteSpace(Link))
-            erros.Add("O link é obrigatório para compromissos remotos.");
+        if (Tipo == TipoCompromisso.Remoto && string.IsNullOrWhiteSpace(Link))
+            erros.Add("O campo \"Link\" deve ser preenchido para compromissos remotos.");
+
+        if (!string.IsNullOrWhiteSpace(Local) && Local.Length > 255)
+            erros.Add("O campo \"Local\" deve conter no máximo 255 caracteres.");
+
+        if (!string.IsNullOrWhiteSpace(Link) && Link.Length > 500)
+            erros.Add("O campo \"Link\" deve conter no máximo 500 caracteres.");
 
         return erros;
     }
 
-    public override void Atualizar(Compromisso compromissoAtualizado)
+    public override void Atualizar(Compromisso entidadeAtualizada)
     {
-        Assunto = compromissoAtualizado.Assunto;
-        DataOcorrencia = compromissoAtualizado.DataOcorrencia;
-        HoraInicio = compromissoAtualizado.HoraInicio;
-        HoraTermino = compromissoAtualizado.HoraTermino;
-        TipoCompromisso = compromissoAtualizado.TipoCompromisso;
-        Local = compromissoAtualizado.Local;
-        Link = compromissoAtualizado.Link;
-        ContatoId = compromissoAtualizado.ContatoId;
+        Assunto = entidadeAtualizada.Assunto;
+        DataOcorrencia = entidadeAtualizada.DataOcorrencia;
+        HoraInicio = entidadeAtualizada.HoraInicio;
+        HoraTermino = entidadeAtualizada.HoraTermino;
+        Tipo = entidadeAtualizada.Tipo;
+        Local = entidadeAtualizada.Local;
+        Link = entidadeAtualizada.Link;
+        Contato = entidadeAtualizada.Contato;
     }
 }

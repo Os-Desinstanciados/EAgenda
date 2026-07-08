@@ -28,62 +28,32 @@ else
             <div class="col">
                 <div class="card h-100">
                     <div class="card-body">
-
                         <div class="d-flex justify-content-between align-items-start gap-3 mb-3">
                             <h5 class="card-title mb-0">@c.Assunto</h5>
-                            <span class="badge text-bg-primary rounded-pill">@c.Id.ToString().Substring(0,8)</span>
+                            <span class="badge text-bg-primary rounded-pill">@c.Tipo</span>
                         </div>
 
                         <dl class="row g-2 mb-4">
-
                             <dt class="col-5 text-secondary fw-semibold">Data</dt>
-                            <dd class="col-7 mb-0">
-                                @c.DataOcorrencia.ToString("dd/MM/yyyy")
-                            </dd>
+                            <dd class="col-7 mb-0">@c.DataOcorrencia.ToString("dd/MM/yyyy")</dd>
 
-                            <dt class="col-5 text-secondary fw-semibold">Início</dt>
-                            <dd class="col-7 mb-0">
-                                @c.HoraInicio
-                            </dd>
+                            <dt class="col-5 text-secondary fw-semibold">Horário</dt>
+                            <dd class="col-7 mb-0">@c.HoraInicio.ToString(@"hh\:mm") - @c.HoraTermino.ToString(@"hh\:mm")</dd>
 
-                            <dt class="col-5 text-secondary fw-semibold">Término</dt>
-                            <dd class="col-7 mb-0">
-                                @c.HoraTermino
-                            </dd>
+                            <dt class="col-5 text-secondary fw-semibold">Contato</dt>
+                            <dd class="col-7 mb-0 text-break">@(string.IsNullOrWhiteSpace(c.ContatoNome) ? "Não informado" : c.ContatoNome)</dd>
 
-                            <dt class="col-5 text-secondary fw-semibold">Tipo</dt>
-                            <dd class="col-7 mb-0">
-                                @c.TipoCompromisso
-                            </dd>
+                            <dt class="col-5 text-secondary fw-semibold">Local</dt>
+                            <dd class="col-7 mb-0 text-break">@(string.IsNullOrWhiteSpace(c.Local) ? "Não informado" : c.Local)</dd>
 
-                            @if (!string.IsNullOrWhiteSpace(c.Local))
-                            {
-                                <dt class="col-5 text-secondary fw-semibold">Local</dt>
-                                <dd class="col-7 mb-0">@c.Local</dd>
-                            }
-
-                            @if (!string.IsNullOrWhiteSpace(c.Link))
-                            {
-                                <dt class="col-5 text-secondary fw-semibold">Link</dt>
-                                <dd class="col-7 mb-0 text-break">@c.Link</dd>
-                            }
-
+                            <dt class="col-5 text-secondary fw-semibold">Link</dt>
+                            <dd class="col-7 mb-0 text-break">@(string.IsNullOrWhiteSpace(c.Link) ? "Não informado" : c.Link)</dd>
                         </dl>
 
                         <div class="d-flex flex-wrap gap-2 mt-auto justify-content-end">
-                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                               asp-action="Editar"
-                               asp-route-id="@c.Id">
-                                Editar
-                            </a>
-
-                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3"
-                               asp-action="Excluir"
-                               asp-route-id="@c.Id">
-                                Excluir
-                            </a>
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="Editar" asp-route-id="@c.Id">Editar</a>
+                            <a class="btn btn-outline-primary btn-sm rounded-pill px-3" asp-action="Excluir" asp-route-id="@c.Id">Excluir</a>
                         </div>
-
                     </div>
                 </div>
             </div>

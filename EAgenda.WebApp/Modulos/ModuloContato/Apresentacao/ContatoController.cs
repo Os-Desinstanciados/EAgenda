@@ -12,6 +12,7 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
     public ActionResult Listar()
     {
         List<ListarContatosDto> dtos = servicoContato.SelecionarTodos();
+
         List<ListarContatosViewModel> listarVms = mapeador.Map<List<ListarContatosViewModel>>(dtos);
 
         return View(listarVms);
@@ -20,12 +21,12 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
     [HttpGet]
     public ActionResult Cadastrar()
     {
-        CadastrarContatoViewModel cadastrarVm = new(
+        CadastrarContatoViewModel cadastrarVm = new CadastrarContatoViewModel(
             string.Empty,
             string.Empty,
             string.Empty,
-            string.Empty,
-            string.Empty
+            null,
+            null
         );
 
         return View(cadastrarVm);
@@ -44,6 +45,7 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
         if (resultado.IsFailed)
         {
             ModelState.AddModelError(resultado);
+
             return View(cadastrarVm);
         }
 
@@ -58,6 +60,7 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
         if (resultado.IsFailed)
         {
             TempData.AddErrorMessage(resultado);
+
             return RedirectToAction(nameof(Listar));
         }
 
@@ -79,6 +82,7 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
         if (resultado.IsFailed)
         {
             ModelState.AddModelError(resultado);
+
             return View(editarVm);
         }
 
@@ -93,6 +97,7 @@ public class ContatoController(ServicoContato servicoContato, IMapper mapeador) 
         if (resultado.IsFailed)
         {
             TempData.AddErrorMessage(resultado);
+
             return RedirectToAction(nameof(Listar));
         }
 
