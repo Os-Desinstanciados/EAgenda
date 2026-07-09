@@ -59,7 +59,10 @@ public static class InjecaoDependencia
                 );
             }
 
-            options.UseSqlServer(connectionString);
+            options.UseSqlServer(connectionString, opt => 
+            {
+                opt.EnableRetryOnFailure(3);
+            });
         });
 
         services.AddScoped<IRepositorioContato, RepositorioContatoEmOrm>();
