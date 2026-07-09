@@ -1,6 +1,8 @@
 using EAgenda.WebApp.Compartilhado.Aplicacao;
 using EAgenda.WebApp.Compartilhado.Apresentacao;
 using EAgenda.WebApp.Compartilhado.Infra;
+using EAgenda.WebApp.Compartilhado.Infra.Orm;
+using Microsoft.Extensions.Diagnostics.HealthChecks;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,11 +13,20 @@ builder.Services.AddApplicationServices(builder.Configuration, builder.Logging);
 
 builder.Services.AddPresentationConfig(builder.Configuration);
 
+builder.Services.AddHealthChecks()
+    .AddDbContextCheck<EAgendaDbContext>(
+        name: "database_check",
+        failureStatus: HealthStatus.Unhealthy,
+        tags: ["ready"]
+    );
+
 var app = builder.Build();
 
 // Middlewares de roteamento
 app.UseRouting();
 app.MapDefaultControllerRoute();
+
+app.MapHealthChecks("/health");
 
 // Execução do Servidor
 app.Run();
